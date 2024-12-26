@@ -1,5 +1,6 @@
 package com.asliutkarsh.springbootsecurityimpl.v1.service.impl;
 
+import com.asliutkarsh.springbootsecurityimpl.v1.dto.SignupRequest;
 import com.asliutkarsh.springbootsecurityimpl.v1.dto.UserDTO;
 import com.asliutkarsh.springbootsecurityimpl.v1.exception.DuplicationEntryException;
 import com.asliutkarsh.springbootsecurityimpl.v1.exception.ResourceNotFoundException;
@@ -25,15 +26,34 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Long createUser(UserDTO userDTO) {
+    public boolean loginSuccess(String username, String password) {
+        User user = userRepository.findByUsername(username)
+                    .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        return user.getPassword().equals(password);
+    }
+
+    @Override
+    public Long registerUser(SignupRequest signupRequest) {
+        UserDTO userDTO = UserDTO.builder()
+                            .email(signupRequest.getEmail())
+                            .username(signupRequest.getUsername())
+                            .build();
+        return createUser(userDTO,signupRequest.getPassword());
+    }
+
+    @Override
+    public Long createUser(UserDTO userDTO,String password) {
         if (userRepository.existsByUsername(userDTO.getUsername())) {
             throw new DuplicationEntryException("Username already exists");
         }
+        if(password==null){
+            //TODO implement logic to generate secure password
+            password = "123456";
+        }
         User user = modelMapper.map(userDTO, User.class);
-
+        user.setPassword(password);
         User savedUser = userRepository.save(user);
         return savedUser.getId();
-
     }
 
     @Override
@@ -57,6 +77,12 @@ public class UserServiceImpl implements UserService {
 
         userRepository.save(user);
     }
+
+    @Override
+    public void updatePassword(Long id, String password) {
+
+    }
+
 
     @Override
     public List<UserDTO> getAllUsers() {

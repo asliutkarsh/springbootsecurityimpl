@@ -2,6 +2,10 @@ package com.asliutkarsh.springbootsecurityimpl.v1.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+
+import java.time.Instant;
 
 /**
  * User entity class
@@ -11,7 +15,6 @@ import lombok.*;
 @Setter
 @ToString
 @RequiredArgsConstructor
-@NoArgsConstructor
 @Table(name = "users", uniqueConstraints = {@UniqueConstraint(name = "user_username_unique", columnNames = "username")})
 @Entity
 public class User {
@@ -24,5 +27,10 @@ public class User {
     private String email;
     private String password;
 
+    @CreatedDate
+    private Instant createdAt;
+
+    @LastModifiedDate
+    private Instant updatedAt;
 
 }
