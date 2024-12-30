@@ -27,7 +27,10 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public Long createPost(PostDTO postDTO) {
+        User user = userRepository.findById(postDTO.getUserId())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         Post post = modelMapper.map(postDTO, Post.class);
+        post.setUser(user);
         Post savedPost = postRepository.save(post);
         return savedPost.getId();
     }
@@ -43,8 +46,12 @@ public class PostServiceImpl implements PostService {
     public void updatePost(Long id, PostDTO postDTO) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Post not found"));
-        post.setTitle(postDTO.getTitle());
-        post.setContent(postDTO.getContent());
+        if (postDTO.getTitle() != null) {
+            post.setTitle(postDTO.getTitle()); 
+        }
+        if (postDTO.getContent() != null) {
+            post.setContent(postDTO.getContent());
+        }
         postRepository.save(post);
     }
 

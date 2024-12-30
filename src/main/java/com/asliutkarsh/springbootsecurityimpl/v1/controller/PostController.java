@@ -17,25 +17,25 @@ public class PostController {
         this.postService = postService;
     }
 
-    @PostMapping(value = "/")
+    @PostMapping(value = "")
     public ResponseEntity<?> createPost(@RequestBody PostDTO postDTO) {
         Long id = postService.createPost(postDTO);
         return new ResponseEntity<>(new ApiResponse("Post Created with ID: " + id, true), HttpStatus.CREATED);
     }
 
-    @PutMapping(value = "/")
+    @PutMapping(value = "")
     public ResponseEntity<?> updatePost(@RequestBody PostDTO postDTO, @RequestParam Long id) {
         postService.updatePost(id, postDTO);
         return new ResponseEntity<>(new ApiResponse("Post Updated", true), HttpStatus.OK);
     }
 
-    @DeleteMapping(value = "/")
+    @DeleteMapping(value = "")
     public ResponseEntity<?> deletePost(@RequestParam Long id) {
         postService.deletePost(id);
         return new ResponseEntity<>(new ApiResponse("Post Deleted", true), HttpStatus.OK);
     }
 
-    @GetMapping(value = "/")
+    @GetMapping(value = "")
     public ResponseEntity<?> getAllPosts() {
         return new ResponseEntity<>(postService.getAllPosts(), HttpStatus.OK);
     }

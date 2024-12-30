@@ -10,6 +10,7 @@ import java.time.Instant;
 @Getter
 @Setter
 @ToString
+@AllArgsConstructor
 @RequiredArgsConstructor
 @Table(name = "posts")
 @Entity

@@ -3,7 +3,6 @@ package com.asliutkarsh.springbootsecurityimpl.v1.controller;
 import com.asliutkarsh.springbootsecurityimpl.v1.dto.ApiResponse;
 import com.asliutkarsh.springbootsecurityimpl.v1.dto.LoginRequest;
 import com.asliutkarsh.springbootsecurityimpl.v1.dto.SignupRequest;
-import com.asliutkarsh.springbootsecurityimpl.v1.dto.UserDTO;
 import com.asliutkarsh.springbootsecurityimpl.v1.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -29,9 +28,9 @@ public class AuthController {
     }
 
     @GetMapping(value = "/logout",
-            consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> logout() {
+    public ResponseEntity<?> logout(@RequestHeader String Authorization) {
+        System.out.println(Authorization);
         return ResponseEntity.ok(new ApiResponse("Logout Done", true));
     }
 

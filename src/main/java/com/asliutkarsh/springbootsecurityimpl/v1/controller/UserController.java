@@ -7,8 +7,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/v1/users")
 public class UserController {
@@ -19,16 +17,21 @@ public class UserController {
         this.userService = userService;
     }
 
-    @PutMapping(value = "/")
+    @PutMapping(value = "")
     public ResponseEntity<?> updateUser(@RequestBody UserDTO userDTO, @RequestHeader Long id) {
         userService.updateUser(id, userDTO);
         return new ResponseEntity<>(new ApiResponse("User Updated", true), HttpStatus.OK);
     }
 
-    @DeleteMapping(value = "/")
+    @DeleteMapping(value = "")
     public ResponseEntity<?> deleteUser(@RequestParam Long id) {
         userService.deleteUser(id);
         return new ResponseEntity<>(new ApiResponse("User Deleted", true), HttpStatus.OK);
+    }
+
+    @GetMapping(value = "")
+    public ResponseEntity<?> getAllUsers() {
+        return new ResponseEntity<>(userService.getAllUsers(), HttpStatus.OK);
     }
 
     @GetMapping(value = "/me")
@@ -36,9 +39,5 @@ public class UserController {
         UserDTO userDTO = userService.getUserByUsername(username);
         return new ResponseEntity<>(userDTO, HttpStatus.OK);
     }
-
-    @GetMapping(value = "/")
-    public ResponseEntity<?> getAllUsers() {
-        return new ResponseEntity<>(userService.getAllUsers(), HttpStatus.OK);
-    }
+    
 }
