@@ -56,7 +56,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public PostDTO getPost(Long id) {
+    public PostDTO getPostById(Long id) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Post not found"));
         return modelMapper.map(post, PostDTO.class);
@@ -64,6 +64,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public List<PostDTO> getAllPosts() {
+        //TODO: Implement pagination
         return postRepository.findAll().stream()
                 .map(post -> modelMapper.map(post, PostDTO.class))
                 .toList();

@@ -8,6 +8,7 @@ import com.asliutkarsh.springbootsecurityimpl.v1.model.User;
 import com.asliutkarsh.springbootsecurityimpl.v1.repository.UserRepository;
 import com.asliutkarsh.springbootsecurityimpl.v1.service.UserService;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,10 +20,13 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserServiceImpl(UserRepository userRepository, ModelMapper modelMapper) {
+
+    public UserServiceImpl(UserRepository userRepository, ModelMapper modelMapper, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.modelMapper = modelMapper;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -51,7 +55,7 @@ public class UserServiceImpl implements UserService {
             password = "123456";
         }
         User user = modelMapper.map(userDTO, User.class);
-        user.setPassword(password);
+        user.setPassword(passwordEncoder.encode(password));
         User savedUser = userRepository.save(user);
         return savedUser.getId();
     }
@@ -80,14 +84,17 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void updatePassword(Long id, String password) {
-
+        User user = userRepository.findById(id)
+                    .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        user.setPassword(passwordEncoder.encode(password));
+        userRepository.save(user);
     }
 
 
     @Override
     public List<UserDTO> getAllUsers() {
         List<User> users = userRepository.findAll();
-
+        //TODO implement pagination
         return users.stream()
                 .map(user -> modelMapper.map(user, UserDTO.class))
                 .collect(Collectors.toList());
