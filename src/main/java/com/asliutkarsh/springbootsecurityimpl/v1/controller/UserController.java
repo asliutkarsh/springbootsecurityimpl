@@ -3,6 +3,7 @@ package com.asliutkarsh.springbootsecurityimpl.v1.controller;
 import com.asliutkarsh.springbootsecurityimpl.v1.dto.ApiResponse;
 import com.asliutkarsh.springbootsecurityimpl.v1.dto.UserDTO;
 import com.asliutkarsh.springbootsecurityimpl.v1.service.UserService;
+import com.asliutkarsh.springbootsecurityimpl.v1.utils.Utils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,28 +17,36 @@ public class UserController {
     public UserController(UserService userService) {
         this.userService = userService;
     }
-
-    @PutMapping(value = "")
-    public ResponseEntity<?> updateUser(@RequestBody UserDTO userDTO, @RequestHeader Long id) {
+    // Update user by ID
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateUser(@RequestBody UserDTO userDTO, @PathVariable Long id) {
         userService.updateUser(id, userDTO);
-        return new ResponseEntity<>(new ApiResponse("User Updated", true), HttpStatus.OK);
+        ApiResponse<Object> response = new ApiResponse<>(true, "User Updated", null, null);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @DeleteMapping(value = "")
-    public ResponseEntity<?> deleteUser(@RequestParam Long id) {
+    // Delete user by ID
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
-        return new ResponseEntity<>(new ApiResponse("User Deleted", true), HttpStatus.OK);
+        ApiResponse<Object> response = new ApiResponse<>(true, "User Deleted", null, null);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @GetMapping(value = "")
+    // Get all users
+    @GetMapping
     public ResponseEntity<?> getAllUsers() {
-        return new ResponseEntity<>(userService.getAllUsers(), HttpStatus.OK);
+        Object users = userService.getAllUsers();
+        ApiResponse<Object> response = new ApiResponse<>(true, "Fetched all users", users, null);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @GetMapping(value = "/me")
-    public ResponseEntity<?> getMe(@RequestHeader String username) {
-        UserDTO userDTO = userService.getUserByUsername(username);
-        return new ResponseEntity<>(userDTO, HttpStatus.OK);
+    // Get the logged-in user's information
+    @GetMapping("/me")
+    public ResponseEntity<?> getMe() {
+        UserDTO userDTO = userService.getUserByUsername(Utils.getAuthenticatedUserName());
+        ApiResponse<Object> response = new ApiResponse<>(true, "Current User fetched", userDTO, null);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
     
 }

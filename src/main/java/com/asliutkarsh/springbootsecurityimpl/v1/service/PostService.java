@@ -8,7 +8,7 @@ public interface PostService {
     Long createPost(PostDTO postDTO);
     void deletePost(Long id);
     void updatePost(Long id, PostDTO postDTO);
-    PostDTO getPost(Long id);
+    PostDTO getPostById(Long id);
     List<PostDTO> getAllPosts();
     List<PostDTO> getPostsByUserId(Long userId);
     List<PostDTO> getPostsByTitle(String title);

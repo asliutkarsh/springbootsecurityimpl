@@ -1,10 +1,15 @@
 package com.asliutkarsh.springbootsecurityimpl.v1.model;
 
 import java.time.Instant;
+import java.util.Collection;
+import java.util.Collections;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -32,7 +37,7 @@ import lombok.ToString;
 @Table(name = "users", uniqueConstraints = {@UniqueConstraint(name = "user_username_unique", columnNames = "username")})
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-public class User {
+public class User implements UserDetails{
 
     @Id
     @SequenceGenerator(name = "user_id_seq",sequenceName = "user_id_seq",allocationSize = 1)
@@ -47,5 +52,30 @@ public class User {
 
     @LastModifiedDate
     private Instant updatedAt;
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return Collections.singleton(new SimpleGrantedAuthority("ROLE_USER"));
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
 
 }

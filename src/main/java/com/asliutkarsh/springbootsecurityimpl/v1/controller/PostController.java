@@ -17,31 +17,44 @@ public class PostController {
         this.postService = postService;
     }
 
-    @PostMapping(value = "")
-    public ResponseEntity<?> createPost(@RequestBody PostDTO postDTO) {
-        Long id = postService.createPost(postDTO);
-        return new ResponseEntity<>(new ApiResponse("Post Created with ID: " + id, true), HttpStatus.CREATED);
-    }
-
-    @PutMapping(value = "")
-    public ResponseEntity<?> updatePost(@RequestBody PostDTO postDTO, @RequestParam Long id) {
-        postService.updatePost(id, postDTO);
-        return new ResponseEntity<>(new ApiResponse("Post Updated", true), HttpStatus.OK);
-    }
-
-    @DeleteMapping(value = "")
-    public ResponseEntity<?> deletePost(@RequestParam Long id) {
-        postService.deletePost(id);
-        return new ResponseEntity<>(new ApiResponse("Post Deleted", true), HttpStatus.OK);
-    }
-
-    @GetMapping(value = "")
-    public ResponseEntity<?> getAllPosts() {
-        return new ResponseEntity<>(postService.getAllPosts(), HttpStatus.OK);
-    }
-
-    @GetMapping(value = "/{id}")
-    public ResponseEntity<?> getPostById(@PathVariable Long id) {
-        return new ResponseEntity<>(postService.getPost(id), HttpStatus.OK);
-    }
+       // Create a new post
+       @PostMapping
+       public ResponseEntity<?> createPost(@RequestBody PostDTO postDTO) {
+           Long id = postService.createPost(postDTO);
+           ApiResponse<Object> response = new ApiResponse<>(true, "Post Created with ID: " + id, null, null);
+           return new ResponseEntity<>(response, HttpStatus.CREATED);
+       }
+   
+       // Update an existing post
+       @PutMapping("/{id}")
+       public ResponseEntity<?> updatePost(@RequestBody PostDTO postDTO, @PathVariable Long id) {
+           postService.updatePost(id, postDTO);
+           ApiResponse<Object> response = new ApiResponse<>(true, "Post Updated", null, null);
+           return new ResponseEntity<>(response, HttpStatus.OK);
+       }
+   
+       // Delete a post
+       @DeleteMapping("/{id}")
+       public ResponseEntity<?> deletePost(@PathVariable Long id) {
+           postService.deletePost(id);
+           ApiResponse<Object> response = new ApiResponse<>(true, "Post Deleted", null, null);
+           return new ResponseEntity<>(response, HttpStatus.OK);
+       }
+   
+       // Get all posts
+       @GetMapping
+       public ResponseEntity<?> getAllPosts() {
+           Object posts = postService.getAllPosts();
+           ApiResponse<Object> response = new ApiResponse<>(true, "Fetched all posts", posts, null);
+           return new ResponseEntity<>(response, HttpStatus.OK);
+       }
+   
+       // Get a post by ID
+       @GetMapping("/{id}")
+       public ResponseEntity<?> getPostById(@PathVariable Long id) {
+           Object post = postService.getPostById(id);
+           ApiResponse<Object> response = new ApiResponse<>(true, "Post fetched", post, null);
+           return new ResponseEntity<>(response, HttpStatus.OK);
+       }
+   
 }
