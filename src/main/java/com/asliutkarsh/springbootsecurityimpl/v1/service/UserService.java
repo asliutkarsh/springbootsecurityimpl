@@ -3,8 +3,6 @@ package com.asliutkarsh.springbootsecurityimpl.v1.service;
 import com.asliutkarsh.springbootsecurityimpl.v1.dto.SignupRequest;
 import com.asliutkarsh.springbootsecurityimpl.v1.dto.UserDTO;
 
-import java.util.List;
-
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.userdetails.UserDetails;
 
