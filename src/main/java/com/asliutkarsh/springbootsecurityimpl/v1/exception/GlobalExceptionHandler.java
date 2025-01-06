@@ -41,6 +41,13 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
     }
 
+    @ExceptionHandler(MaxSessionsExceededException.class)
+    public ResponseEntity<ApiResponse<Object>> handleMaxSessionsExceededException(MaxSessionsExceededException e) {
+        log.error("Max Sessions Exceeded Exception: {}", e.getMessage());
+        ApiResponse<Object> response = new ApiResponse<>(false, e.getMessage(), null, null);
+        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+    }
+
 
 
     @ExceptionHandler(Exception.class)

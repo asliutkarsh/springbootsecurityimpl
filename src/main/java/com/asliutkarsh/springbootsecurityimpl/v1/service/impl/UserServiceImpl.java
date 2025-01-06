@@ -8,6 +8,7 @@ import com.asliutkarsh.springbootsecurityimpl.v1.model.User;
 import com.asliutkarsh.springbootsecurityimpl.v1.repository.UserRepository;
 import com.asliutkarsh.springbootsecurityimpl.v1.service.UserService;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -37,27 +38,20 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Long registerUser(SignupRequest signupRequest) {
-        UserDTO userDTO = UserDTO.builder()
-                            .email(signupRequest.getEmail())
-                            .username(signupRequest.getUsername())
-                            .build();
-        return createUser(userDTO,signupRequest.getPassword());
-    }
+    public UserDetails createUser(SignupRequest signupRequest) {
 
-    @Override
-    public Long createUser(UserDTO userDTO,String password) {
-        if (userRepository.existsByUsername(userDTO.getUsername())) {
+        if (userRepository.existsByUsername(signupRequest.getUsername())) {
             throw new DuplicationEntryException("Username already exists");
         }
-        if(password==null){
-            //TODO implement logic to generate secure password
-            password = "123456";
-        }
-        User user = modelMapper.map(userDTO, User.class);
-        user.setPassword(passwordEncoder.encode(password));
+
+        User user = User.builder()
+                    .username(signupRequest.getUsername())
+                    .email(signupRequest.getEmail())
+                    .password(passwordEncoder.encode(signupRequest.getPassword()))
+                    .build();
         User savedUser = userRepository.save(user);
-        return savedUser.getId();
+
+        return savedUser;
     }
 
     @Override

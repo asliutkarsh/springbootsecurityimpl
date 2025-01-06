@@ -5,10 +5,11 @@ import com.asliutkarsh.springbootsecurityimpl.v1.dto.UserDTO;
 
 import java.util.List;
 
+import org.springframework.security.core.userdetails.UserDetails;
+
 public interface UserService {
     boolean loginSuccess(String username, String password);
-    Long registerUser(SignupRequest signupRequest);
-    Long createUser(UserDTO userDTO,String password);
+    UserDetails createUser(SignupRequest signupRequest);
     void deleteUser(Long id);
     void updateUser(Long id, UserDTO userDTO);
     void updatePassword(Long id,String password);
