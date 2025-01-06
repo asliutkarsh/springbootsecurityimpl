@@ -3,6 +3,10 @@ package com.asliutkarsh.springbootsecurityimpl.v1.controller;
 import com.asliutkarsh.springbootsecurityimpl.v1.dto.ApiResponse;
 import com.asliutkarsh.springbootsecurityimpl.v1.dto.PostDTO;
 import com.asliutkarsh.springbootsecurityimpl.v1.service.PostService;
+
+import java.util.Map;
+
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -43,16 +47,28 @@ public class PostController {
    
        // Get all posts
        @GetMapping
-       public ResponseEntity<?> getAllPosts() {
-           Object posts = postService.getAllPosts();
-           ApiResponse<Object> response = new ApiResponse<>(true, "Fetched all posts", posts, null);
+       public ResponseEntity<?> getAllPosts(
+                                        @RequestParam(defaultValue = "0") Integer pageNo,
+                                        @RequestParam(defaultValue = "10") Integer pageSize,
+                                        @RequestParam(defaultValue = "id") String sortBy,
+                                        @RequestParam(defaultValue = "asc") String sortDir
+       ) {
+           Page<PostDTO> posts = postService.getAllPosts(pageNo, pageSize, sortBy, sortDir);
+           ApiResponse<Object> response = new ApiResponse<>(true, 
+                                                        "Fetched all posts", 
+                                                                posts.getContent(),
+                                                                    Map.of(
+                                                                    "totalPages", posts.getTotalPages(),
+                                                                    "totalElements", posts.getTotalElements(),
+                                                                    "currentPage", posts.getNumber()
+                                                                ));
            return new ResponseEntity<>(response, HttpStatus.OK);
        }
    
        // Get a post by ID
        @GetMapping("/{id}")
        public ResponseEntity<?> getPostById(@PathVariable Long id) {
-           Object post = postService.getPostById(id);
+           PostDTO post = postService.getPostById(id);
            ApiResponse<Object> response = new ApiResponse<>(true, "Post fetched", post, null);
            return new ResponseEntity<>(response, HttpStatus.OK);
        }

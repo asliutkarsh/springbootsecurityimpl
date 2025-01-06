@@ -5,6 +5,7 @@ import com.asliutkarsh.springbootsecurityimpl.v1.dto.UserDTO;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.security.core.userdetails.UserDetails;
 
 public interface UserService {
@@ -13,7 +14,7 @@ public interface UserService {
     void deleteUser(Long id);
     void updateUser(Long id, UserDTO userDTO);
     void updatePassword(Long id,String password);
-    List<UserDTO> getAllUsers();
+    Page<UserDTO> getAllUsers(Integer pageNumber, Integer pageSize,String sortBy,String sortDir);
     UserDTO getUserById(Long id);
     UserDTO getUserByUsername(String username);
     UserDTO getUserByEmail(String email);

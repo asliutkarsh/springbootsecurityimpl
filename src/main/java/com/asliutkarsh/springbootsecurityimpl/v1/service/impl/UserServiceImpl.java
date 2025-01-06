@@ -9,13 +9,15 @@ import com.asliutkarsh.springbootsecurityimpl.v1.model.User;
 import com.asliutkarsh.springbootsecurityimpl.v1.repository.UserRepository;
 import com.asliutkarsh.springbootsecurityimpl.v1.service.UserService;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -88,12 +90,13 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public List<UserDTO> getAllUsers() {
-        List<User> users = userRepository.findAll();
-        //TODO implement pagination
-        return users.stream()
-                .map(user -> modelMapper.map(user, UserDTO.class))
-                .collect(Collectors.toList());
+    public Page<UserDTO> getAllUsers(Integer pageNo, Integer pageSize, String sortBy, String sortDir) {
+        Sort sort = (sortDir.equalsIgnoreCase("asc"))?Sort.by(sortBy).ascending():Sort.by(sortBy).descending();
+        Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
+
+        Page<User> users = userRepository.findAll(pageable);
+
+        return users.map(user -> modelMapper.map(user, UserDTO.class));
     }
 
     @Override

@@ -8,6 +8,10 @@ import com.asliutkarsh.springbootsecurityimpl.v1.repository.PostRepository;
 import com.asliutkarsh.springbootsecurityimpl.v1.repository.UserRepository;
 import com.asliutkarsh.springbootsecurityimpl.v1.service.PostService;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -63,11 +67,12 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<PostDTO> getAllPosts() {
-        //TODO: Implement pagination
-        return postRepository.findAll().stream()
-                .map(post -> modelMapper.map(post, PostDTO.class))
-                .toList();
+    public Page<PostDTO> getAllPosts(Integer pageNo, Integer pageSize, String sortBy, String sortDir){
+        Sort sort = (sortDir.equalsIgnoreCase("asc"))?Sort.by(sortBy).ascending():Sort.by(sortBy).descending();
+        Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
+
+        return postRepository.findAll(pageable)
+                .map(post -> modelMapper.map(post, PostDTO.class));
     }
 
     @Override
