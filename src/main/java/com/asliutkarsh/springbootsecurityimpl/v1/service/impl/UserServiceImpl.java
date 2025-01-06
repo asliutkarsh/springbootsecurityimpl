@@ -2,6 +2,7 @@ package com.asliutkarsh.springbootsecurityimpl.v1.service.impl;
 
 import com.asliutkarsh.springbootsecurityimpl.v1.dto.SignupRequest;
 import com.asliutkarsh.springbootsecurityimpl.v1.dto.UserDTO;
+import com.asliutkarsh.springbootsecurityimpl.v1.enums.Role;
 import com.asliutkarsh.springbootsecurityimpl.v1.exception.DuplicationEntryException;
 import com.asliutkarsh.springbootsecurityimpl.v1.exception.ResourceNotFoundException;
 import com.asliutkarsh.springbootsecurityimpl.v1.model.User;
@@ -48,6 +49,7 @@ public class UserServiceImpl implements UserService {
                     .username(signupRequest.getUsername())
                     .email(signupRequest.getEmail())
                     .password(passwordEncoder.encode(signupRequest.getPassword()))
+                    .role(Role.valueOf(signupRequest.getRole()))
                     .build();
         User savedUser = userRepository.save(user);
 

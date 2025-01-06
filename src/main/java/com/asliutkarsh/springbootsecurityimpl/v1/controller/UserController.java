@@ -6,6 +6,7 @@ import com.asliutkarsh.springbootsecurityimpl.v1.service.UserService;
 import com.asliutkarsh.springbootsecurityimpl.v1.utils.Utils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -34,6 +35,7 @@ public class UserController {
     }
 
     // Get all users
+    @PreAuthorize("hasAuthority('admin:read')")
     @GetMapping
     public ResponseEntity<?> getAllUsers() {
         Object users = userService.getAllUsers();
