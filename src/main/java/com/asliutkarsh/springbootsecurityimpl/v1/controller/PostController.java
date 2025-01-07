@@ -4,6 +4,8 @@ import com.asliutkarsh.springbootsecurityimpl.v1.dto.ApiResponse;
 import com.asliutkarsh.springbootsecurityimpl.v1.dto.PostDTO;
 import com.asliutkarsh.springbootsecurityimpl.v1.service.PostService;
 
+import jakarta.validation.Valid;
+
 import java.util.Map;
 
 import org.springframework.data.domain.Page;
@@ -23,7 +25,7 @@ public class PostController {
 
        // Create a new post
        @PostMapping
-       public ResponseEntity<?> createPost(@RequestBody PostDTO postDTO) {
+       public ResponseEntity<?> createPost(@RequestBody @Valid PostDTO postDTO) {
            Long id = postService.createPost(postDTO);
            ApiResponse<Object> response = new ApiResponse<>(true, "Post Created with ID: " + id, null, null);
            return new ResponseEntity<>(response, HttpStatus.CREATED);
@@ -31,7 +33,7 @@ public class PostController {
    
        // Update an existing post
        @PutMapping("/{id}")
-       public ResponseEntity<?> updatePost(@RequestBody PostDTO postDTO, @PathVariable Long id) {
+       public ResponseEntity<?> updatePost(@RequestBody @Valid PostDTO postDTO, @PathVariable Long id) {
            postService.updatePost(id, postDTO);
            ApiResponse<Object> response = new ApiResponse<>(true, "Post Updated", null, null);
            return new ResponseEntity<>(response, HttpStatus.OK);

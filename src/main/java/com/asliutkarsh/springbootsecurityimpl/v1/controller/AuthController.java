@@ -4,6 +4,8 @@ import com.asliutkarsh.springbootsecurityimpl.v1.dto.LoginRequest;
 import com.asliutkarsh.springbootsecurityimpl.v1.dto.SignupRequest;
 import com.asliutkarsh.springbootsecurityimpl.v1.service.AuthService;
 
+import jakarta.validation.Valid;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,12 +21,12 @@ public class AuthController {
     }
 
     @PostMapping(value = "/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<?> login(@RequestBody @Valid LoginRequest loginRequest) {
         return new ResponseEntity<>(authService.login(loginRequest), HttpStatus.OK);
     }
 
     @PostMapping(value = "/register")
-    public ResponseEntity<?> register(@RequestBody SignupRequest signupRequest) {
+    public ResponseEntity<?> register(@RequestBody @Valid SignupRequest signupRequest) {
         return new ResponseEntity<>(authService.register(signupRequest), HttpStatus.CREATED);
     }
 

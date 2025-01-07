@@ -8,6 +8,9 @@ import com.asliutkarsh.springbootsecurityimpl.v1.exception.ResourceNotFoundExcep
 import com.asliutkarsh.springbootsecurityimpl.v1.model.User;
 import com.asliutkarsh.springbootsecurityimpl.v1.repository.UserRepository;
 import com.asliutkarsh.springbootsecurityimpl.v1.service.UserService;
+
+import lombok.extern.slf4j.Slf4j;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,6 +23,7 @@ import org.springframework.stereotype.Service;
 import java.util.Objects;
 
 @Service
+@Slf4j
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
@@ -47,11 +51,13 @@ public class UserServiceImpl implements UserService {
             throw new DuplicationEntryException("Username already exists");
         }
 
+        Role role = signupRequest.getRole() == null ? Role.USER : Role.valueOf(signupRequest.getRole().toUpperCase());
+
         User user = User.builder()
                     .username(signupRequest.getUsername())
                     .email(signupRequest.getEmail())
                     .password(passwordEncoder.encode(signupRequest.getPassword()))
-                    .role(Role.valueOf(signupRequest.getRole()))
+                    .role(role)
                     .build();
         User savedUser = userRepository.save(user);
 

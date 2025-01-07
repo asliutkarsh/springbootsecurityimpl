@@ -30,7 +30,7 @@ public class SpringbootSecurityImplApplication {
                 var superAdmin = SignupRequest.builder()
                         .username("superadmin")
                         .email("superadmin@mail.com")
-                        .password("admin")
+                        .password("Password@123")
                         .role("SUPER_ADMIN")
                         .build();
 

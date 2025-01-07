@@ -18,4 +18,5 @@ public interface TokenRepository extends JpaRepository<Token, Long> {
     void deleteByUser(User user);
     long countByUser(User user);
     List<Token> findByUserOrderByCreatedAtDesc(User user);
+    
 }
