@@ -9,6 +9,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import com.asliutkarsh.springbootsecurityimpl.v1.enums.Provider;
 import com.asliutkarsh.springbootsecurityimpl.v1.enums.Role;
 
 import jakarta.persistence.Column;
@@ -48,6 +49,10 @@ public class User implements UserDetails{
     private String username;
     private String email;
     private String password;
+
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private Provider provider = Provider.LOCAL;;
 
     @Enumerated(EnumType.STRING)
     private Role role;

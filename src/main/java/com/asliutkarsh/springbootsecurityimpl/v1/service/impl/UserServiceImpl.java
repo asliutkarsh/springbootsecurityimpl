@@ -2,6 +2,7 @@ package com.asliutkarsh.springbootsecurityimpl.v1.service.impl;
 
 import com.asliutkarsh.springbootsecurityimpl.v1.dto.SignupRequest;
 import com.asliutkarsh.springbootsecurityimpl.v1.dto.UserDTO;
+import com.asliutkarsh.springbootsecurityimpl.v1.enums.Provider;
 import com.asliutkarsh.springbootsecurityimpl.v1.enums.Role;
 import com.asliutkarsh.springbootsecurityimpl.v1.exception.DuplicationEntryException;
 import com.asliutkarsh.springbootsecurityimpl.v1.exception.ResourceNotFoundException;
@@ -17,10 +18,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -28,13 +30,12 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
-    private final PasswordEncoder passwordEncoder;
+    private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
 
-    public UserServiceImpl(UserRepository userRepository, ModelMapper modelMapper, PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserRepository userRepository, ModelMapper modelMapper) {
         this.userRepository = userRepository;
         this.modelMapper = modelMapper;
-        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -52,11 +53,13 @@ public class UserServiceImpl implements UserService {
         }
 
         Role role = signupRequest.getRole() == null ? Role.USER : Role.valueOf(signupRequest.getRole().toUpperCase());
+        Provider provider = signupRequest.getProvider() == null ? Provider.LOCAL : Provider.valueOf(signupRequest.getProvider().toUpperCase());
 
         User user = User.builder()
                     .username(signupRequest.getUsername())
                     .email(signupRequest.getEmail())
                     .password(passwordEncoder.encode(signupRequest.getPassword()))
+                    .provider(provider)
                     .role(role)
                     .build();
         User savedUser = userRepository.save(user);
@@ -125,4 +128,17 @@ public class UserServiceImpl implements UserService {
                     .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         return modelMapper.map(user, UserDTO.class);
     }
+
+    @Override
+    public Optional<UserDTO> getUserByEmailOptional(String email) {
+        return userRepository.findByEmail(email)
+                    .map(user -> modelMapper.map(user, UserDTO.class));
+    }
+
+    @Override
+    public Optional<UserDTO> getUserByUsernameOptional(String username) {
+        return userRepository.findByUsername(username)
+                    .map(user -> modelMapper.map(user, UserDTO.class));
+    }
+
 }

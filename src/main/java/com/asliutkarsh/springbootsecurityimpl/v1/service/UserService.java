@@ -3,6 +3,8 @@ package com.asliutkarsh.springbootsecurityimpl.v1.service;
 import com.asliutkarsh.springbootsecurityimpl.v1.dto.SignupRequest;
 import com.asliutkarsh.springbootsecurityimpl.v1.dto.UserDTO;
 
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -16,5 +18,7 @@ public interface UserService {
     UserDTO getUserById(Long id);
     UserDTO getUserByUsername(String username);
     UserDTO getUserByEmail(String email);
+    Optional<UserDTO> getUserByEmailOptional(String email);
+    Optional<UserDTO> getUserByUsernameOptional(String username);
 
 }
