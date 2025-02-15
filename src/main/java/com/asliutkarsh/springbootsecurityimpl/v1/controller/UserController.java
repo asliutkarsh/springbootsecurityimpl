@@ -4,8 +4,13 @@ import com.asliutkarsh.springbootsecurityimpl.v1.dto.ApiResponse;
 import com.asliutkarsh.springbootsecurityimpl.v1.dto.UserDTO;
 import com.asliutkarsh.springbootsecurityimpl.v1.service.UserService;
 import com.asliutkarsh.springbootsecurityimpl.v1.utils.Utils;
+
+import java.util.Map;
+
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -34,10 +39,24 @@ public class UserController {
     }
 
     // Get all users
+    @PreAuthorize("hasAuthority('admin:read')")
     @GetMapping
-    public ResponseEntity<?> getAllUsers() {
-        Object users = userService.getAllUsers();
-        ApiResponse<Object> response = new ApiResponse<>(true, "Fetched all users", users, null);
+    public ResponseEntity<?> getAllUsers(
+            @RequestParam(defaultValue = "0") Integer pageNo,
+            @RequestParam(defaultValue = "10") Integer pageSize,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir
+    ) {
+        Page<UserDTO> users = userService.getAllUsers(pageNo, pageSize, sortBy, sortDir);
+        
+        ApiResponse<Object> response = new ApiResponse<>(true, 
+                                                    "Fetched all users", 
+                                                            users.getContent(), 
+                                                            Map.of(
+                                                                "totalPages", users.getTotalPages(),
+                                                                "totalElements", users.getTotalElements(),
+                                                                "currentPage", users.getNumber()
+                                                            ));
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 

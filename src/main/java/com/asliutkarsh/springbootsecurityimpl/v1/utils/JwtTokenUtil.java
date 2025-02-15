@@ -17,7 +17,8 @@ import java.util.function.Function;
 @Component
 public class JwtTokenUtil {
     //TODO: move to properties
-    public static final long JWT_TOKEN_VALIDITY = 7*24*60*60 ; // 7 days in seconds
+    public static final long JWT_TOKEN_VALIDITY = 1*24*60*60*1000 ; // 1 days in milliseconds
+    public static final long JWT_REFRESH_TOKEN_VALIDITY = 7*24*60*60*1000 ; // 7 days in milliseconds
 
     private static final String SECRET = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ";
 
@@ -45,15 +46,20 @@ public class JwtTokenUtil {
 
     public String generatedToken(UserDetails userDetails){
         Map<String,Object> claims = new HashMap<>();
-        return doGenerateToken(claims,userDetails.getUsername());
+        return doGenerateToken(claims,userDetails.getUsername(),JWT_TOKEN_VALIDITY);
     }
 
-    private String doGenerateToken(Map<String, Object> claims, String subject) {
+    public String generatedRefreshToken(UserDetails userDetails){
+        Map<String,Object> claims = new HashMap<>();
+        return doGenerateToken(claims,userDetails.getUsername(),JWT_REFRESH_TOKEN_VALIDITY);
+    }
+
+    private String doGenerateToken(Map<String, Object> claims, String subject,long expiration) {
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(subject)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY * 1000))
+                .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSignKey(), SignatureAlgorithm.HS512).compact();
     }
 
