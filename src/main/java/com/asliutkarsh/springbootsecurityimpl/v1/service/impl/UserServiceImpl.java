@@ -10,6 +10,7 @@ import com.asliutkarsh.springbootsecurityimpl.v1.model.User;
 import com.asliutkarsh.springbootsecurityimpl.v1.repository.UserRepository;
 import com.asliutkarsh.springbootsecurityimpl.v1.service.UserService;
 
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
 import org.modelmapper.ModelMapper;
@@ -45,6 +46,7 @@ public class UserServiceImpl implements UserService {
         return user.getPassword().equals(password);
     }
 
+    @Transactional
     @Override
     public UserDetails createUser(SignupRequest signupRequest) {
 

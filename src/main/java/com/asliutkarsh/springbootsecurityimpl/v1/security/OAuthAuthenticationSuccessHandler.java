@@ -11,6 +11,7 @@ import com.asliutkarsh.springbootsecurityimpl.v1.utils.JwtTokenUtil;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -35,9 +36,8 @@ public class OAuthAuthenticationSuccessHandler implements AuthenticationSuccessH
 
     private static final String FRONTENDURL = "http://localhost:3000";
 
-
-
-    public OAuthAuthenticationSuccessHandler(UserService userService, JwtTokenUtil jwtTokenUtil, ModelMapper modelMapper, TokenService tokenService) {
+    public OAuthAuthenticationSuccessHandler(UserService userService, JwtTokenUtil jwtTokenUtil,
+            ModelMapper modelMapper, TokenService tokenService) {
         this.userService = userService;
         this.jwtTokenUtil = jwtTokenUtil;
         this.modelMapper = modelMapper;
@@ -45,60 +45,78 @@ public class OAuthAuthenticationSuccessHandler implements AuthenticationSuccessH
     }
 
     @Override
-    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-        DefaultOAuth2User user = (DefaultOAuth2User) authentication.getPrincipal();
-        Map<String, Object> attributes = user.getAttributes();
+    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
+            Authentication authentication) throws IOException, ServletException {
+        try {
+            var oauth2AuthenicationToken = (OAuth2AuthenticationToken) authentication;
+            DefaultOAuth2User user = (DefaultOAuth2User) authentication.getPrincipal();
 
-        String email = attributes.get("email").toString();
-        String name = attributes.get("name").toString();
+            UserDetails userDetails = null;
+            String email = null;
+            String name = null;
+            String provider = "";
 
-        UserDTO existingUser = userService.getUserByEmailOptional(email).orElse(null);
-        
+            if (oauth2AuthenicationToken.getAuthorizedClientRegistrationId().equals("google")) {
+                email = user.getAttribute("email").toString();
+                name = user.getAttribute("name").toString();
+                provider = "GOOGLE";
+            } else if (oauth2AuthenicationToken.getAuthorizedClientRegistrationId().equals("github")) {
+                email = user.getAttribute("email") != null ? user.getAttribute("email").toString()
+                        : user.getAttribute("login").toString() + "@gmail.com";
+                name = user.getAttribute("login").toString();
+                provider = "GITHUB";
+            }
 
-        UserDetails userDetails = null; 
-        if (existingUser == null) {
-            SignupRequest newUser = SignupRequest.builder()
-                    .email(email)
-                    .username(generateUsername(name))
-                    .provider("GOOGLE")
-                    .role("USER")
-                    .password(generatePassword()) 
-                    .build();
-            userDetails = userService.createUser(newUser);
+            UserDTO existingUser = userService.getUserByEmailOptional(email).orElse(null);
+
+            if (existingUser == null) {
+                SignupRequest newUser = SignupRequest.builder()
+                        .email(email)
+                        .username(generateUsername(name))
+                        .provider(provider.equals("GITHUB") ? "GITHUB" : "GOOGLE")
+                        .role("USER")
+                        .password(generatePassword())
+                        .build();
+                userDetails = userService.createUser(newUser);
+            } else {
+                userDetails = modelMapper.map(existingUser, User.class);
+            }
+
+            // Generate JWT token
+            String token = jwtTokenUtil.generatedToken(userDetails);
+            String refreshToken = jwtTokenUtil.generatedRefreshToken(userDetails);
+            tokenService.saveToken(token, refreshToken, modelMapper.map(userDetails, User.class),
+                    SessionPolicy.MULTIPLE_SESSIONS);
+
+            String redirectUrl = FRONTENDURL + "/oauth/redirect?success=true";
+
+            Cookie tokenCookie = new Cookie("accessToken", token);
+            // tokenCookie.setHttpOnly(true);
+            // tokenCookie.setSecure(true);
+            tokenCookie.setPath("/");
+            tokenCookie.setMaxAge(100);
+
+            Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
+            // refreshTokenCookie.setHttpOnly(true);
+            // refreshTokenCookie.setSecure(true);
+            refreshTokenCookie.setPath("/");
+            refreshTokenCookie.setMaxAge(100);
+
+            response.addCookie(tokenCookie);
+            response.addCookie(refreshTokenCookie);
+            response.sendRedirect(redirectUrl);
+
+        } catch (Exception e) {
+            log.error("Error: {}", e.getMessage());
+            response.sendRedirect(FRONTENDURL + "/oauth/redirect?success=false");
         }
-        else{
-            userDetails = modelMapper.map(existingUser, User.class); 
-        }
-
-        // Generate JWT token
-        String token = jwtTokenUtil.generatedToken(userDetails);
-        String refreshToken = jwtTokenUtil.generatedRefreshToken(userDetails);
-        tokenService.saveToken(token, refreshToken, modelMapper.map(userDetails, User.class), SessionPolicy.MULTIPLE_SESSIONS);
-
-
-        String redirectUrl = FRONTENDURL + "/oauth/redirect?success=true";
-
-        Cookie tokenCookie = new Cookie("accessToken", token);
-        // tokenCookie.setHttpOnly(true);
-        // tokenCookie.setSecure(true); 
-        tokenCookie.setPath("/"); 
-        tokenCookie.setMaxAge(100); 
-
-        Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
-        // refreshTokenCookie.setHttpOnly(true);
-        // refreshTokenCookie.setSecure(true);
-        refreshTokenCookie.setPath("/");
-        refreshTokenCookie.setMaxAge(100);
-
-        response.addCookie(tokenCookie);
-        response.addCookie(refreshTokenCookie);
-        response.sendRedirect(redirectUrl);
     }
 
     private String generateUsername(String name) {
-        // replace spaces with empty string and convert to lowercase add random number if username already exists
+        // replace spaces with empty string and convert to lowercase add random number
+        // if username already exists
         name = name.toLowerCase().replace(" ", "");
-        while (userService.getUserByUsernameOptional(name).isPresent()){
+        while (userService.getUserByUsernameOptional(name).isPresent()) {
             log.info("Username already exists, adding random number to username");
             name += (int) (Math.random() * 100);
         }
