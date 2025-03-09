@@ -33,10 +33,12 @@
         <maven.compiler.target>17</maven.compiler.target>
     </properties>
     <dependencies>
+      
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
+
         <!-- Starter -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -88,6 +90,7 @@
             <artifactId>spring-boot-starter-oauth2-client</artifactId>
         </dependency>
         <!--        Jwt dependency   -->
+
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>
