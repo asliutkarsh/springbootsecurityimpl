@@ -1,0 +1,10 @@
+*
+# Include the src directory
+!src/
+# Include the pom.xml file
+!pom.xml
+# Exclude the target directory and its contents
+target/
+
+# yaml
+/src/main/resources/application-dev.yaml
