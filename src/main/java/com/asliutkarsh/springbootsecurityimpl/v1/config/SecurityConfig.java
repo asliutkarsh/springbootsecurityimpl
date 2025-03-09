@@ -3,6 +3,9 @@ package com.asliutkarsh.springbootsecurityimpl.v1.config;
 import com.asliutkarsh.springbootsecurityimpl.v1.security.CustomUserDetailService;
 import com.asliutkarsh.springbootsecurityimpl.v1.security.JwtAuthenticationEntryPoint;
 import com.asliutkarsh.springbootsecurityimpl.v1.security.JwtAuthenticationFilter;
+import com.asliutkarsh.springbootsecurityimpl.v1.security.OAuthAuthenticationFailureHandler;
+import com.asliutkarsh.springbootsecurityimpl.v1.security.OAuthAuthenticationSuccessHandler;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -16,7 +19,6 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
@@ -31,22 +33,24 @@ import java.util.List;
 public class SecurityConfig {
 
     private final CustomUserDetailService customUserDetailService;
-
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
-
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-
     private final LogoutHandler logoutHandler;
+    private final OAuthAuthenticationSuccessHandler oAuthAuthenticationSuccessHandler;
+    private final OAuthAuthenticationFailureHandler oAuthAuthenticationFailureHandler;
 
     private static final List<String> allowedOrigins = List.of(
             "http://localhost:3000/",
             "http://127.0.0.1:3000/"
     );
-    public SecurityConfig(CustomUserDetailService customUserDetailService, JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint, JwtAuthenticationFilter jwtAuthenticationFilter, LogoutHandler logoutHandler) {
+
+    public SecurityConfig(CustomUserDetailService customUserDetailService, JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint, JwtAuthenticationFilter jwtAuthenticationFilter, LogoutHandler logoutHandler, OAuthAuthenticationSuccessHandler oAuthAuthenticationSuccessHandler, OAuthAuthenticationFailureHandler oAuthAuthenticationFailureHandler) {
         this.customUserDetailService = customUserDetailService;
         this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.logoutHandler = logoutHandler;
+        this.oAuthAuthenticationSuccessHandler = oAuthAuthenticationSuccessHandler;
+        this.oAuthAuthenticationFailureHandler = oAuthAuthenticationFailureHandler;
     }
 
 
@@ -66,20 +70,15 @@ public class SecurityConfig {
                 .logout(logout -> logout
                         .logoutUrl("/api/v1/auth/logout")
                         .addLogoutHandler(logoutHandler)
-                        .logoutSuccessHandler((request, response, authentication) -> SecurityContextHolder.clearContext())
-                        // .clearAuthentication(true)
-                        )
-                ;
-
+                        .logoutSuccessHandler((request, response, authentication) -> SecurityContextHolder.clearContext()))
+                .oauth2Login(oauth2 -> oauth2
+                        .successHandler(oAuthAuthenticationSuccessHandler)
+                        .failureHandler(oAuthAuthenticationFailureHandler))
+        ;
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         http.authenticationProvider(authenticationProvider());
 
         return http.build();
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
     }
 
     @Bean
@@ -92,7 +91,7 @@ public class SecurityConfig {
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         provider.setUserDetailsService(customUserDetailService);
-        provider.setPasswordEncoder(passwordEncoder());
+        provider.setPasswordEncoder(new BCryptPasswordEncoder());
         return provider;
     }
 
